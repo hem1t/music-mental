@@ -56,8 +56,6 @@
 | No Blanks in Frequency fields | _NoFix_ needed |
 
 #### Few Extra changes for Beauty points
-(Using Power Query to keep the change log)
-
 1. Removing field `Timestamp`, `Foreign` and `Service`.
 2. Changing field values in `FavGen`, 
     ("Video game music" to "VideoGame"),
@@ -67,14 +65,18 @@
 
 ## Questions to ask
 1. How many percent of people claim Improvement in Mental Health [->](#the-percentage-of-people-claim-improvement-in-mental-health)
-2. Is there any genre of Music that has "No Effect" or high amount of "Effect"?
-3. What age group benefited the most?
-4. How does genre preference change by the age group?
+2. Does "Effect" corelates to Mental health issue (OCD, Insomnia, Depression, Anxiety) [->](#does-effect-co-relates-to-mental-health-issue)
+3. Is there any genre of Music that has "No Effect" or high amount of "Effect"?
+4. What age group benefited the most?
 5. "Effect" and "No Effect" Correlation with BPM
-6. Does the "Fav Genre" align with the Mostly listened genre and how does it correlate to Mental health "Effect" 
-7. What is the relation between age group and hours listened
-8. Does "Effect" corelates to Mental health issue (OCD, Insomnia, Depression, Anxiety)
 
 ## Analysis
 #### The percentage of people claim Improvement in Mental Health
 <img src="Images/1_effects_on_people.svg" alt="Pie Chart" width="450px">
+
+#### Does "Effect" co-relates to Mental health issue
+* Many claim highscores in many different mental health issue. Need to separate them as to issue individually for everyone.
+* So let's consider Issues with ">=3" and count effects for each issue.
+* We see that effect does not change by the change in mental Issue.
+
+<img src="Images/2_effects_on_issue.svg" alt="Column Chart" width="450px">
