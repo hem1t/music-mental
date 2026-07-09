@@ -1,4 +1,8 @@
 # Music and Mental health Exploratory Data Analysis using Excel
+1. [Data preparation and cleaning phase](#data-preparation-phase)
+2. [Asking questions](#questions-to-ask)
+3. [Answers to the questions](#analysis)
+
 ## Data Preparation Phase
 > Since this is exploratory analysis of a pre-prepared [dataset](https://www.kaggle.com/datasets/catherinerasgaitis/mxmh-survey-results) the [Asking](#questions-to-ask) comes later
 
@@ -41,7 +45,7 @@
 #### Data Fixes
 | **Anamoly** | **Fix** |
 |-|-|
-| 1 Blank Age value | _NoFix_ needed |
+| 1 Blank Age value | Setting it to a Median |
 | 1 Blank in Service | _NoFix_ needed |
 | Some exaggerated reported hours in ListenTime | _NoFix_ Fall under Outlier |
 | 3 Blanks in OnWork | Putting "Yes" if ListenTime is +8Hrs else "No" |
@@ -49,6 +53,16 @@
 | 4 Blanks in Foreign | Setting them to "No" |
 | BPM's set to 999999999, 624, 0 | _NoFix_ for 0 Outliers, Setting highs to 300 as they interfere with histogram |
 | 107 Blanks in BPM | _NoFix_ These may have made difference, but cannot do anything. A data point which may go ignored. But seeing that it shows normal distribution it's ok | 
+| No Blanks in Frequency fields | _NoFix_ needed |
+
+#### Few Extra changes for Beauty points
+(Using Power Query to keep the change log)
+
+1. Removing field `Timestamp`, `Foreign` and `Service`.
+2. Changing field values in `FavGen`, 
+    ("Video game music" to "VideoGame"),
+    ("Hip hop" to "HipHop"),
+    ("K pop" to "KPop")
 
 
 ## Questions to ask
@@ -60,3 +74,8 @@
 6. Does the "Fav Genre" align with the Mostly listened genre and how does it correlate to Mental health "Effect" 
 7. What is the relation between age group and hours listened
 8. Does "Effect" corelates to Mental health issue (OCD, Insomnia, Depression, Anxiety)
+
+## Analysis
+1. The percentage of people claim Improment in Mental Health
+> 74% claim improvement
+![Pie chart](Images/1_effects_on_people.svg)
