@@ -66,7 +66,7 @@
 
 
 ## Questions to ask
-1. How many percent of people claim Improvement in Mental Health
+1. How many percent of people claim Improvement in Mental Health [->](#the-percentage-of-people-claim-improvement-in-mental-health)
 2. Is there any genre of Music that has "No Effect" or high amount of "Effect"?
 3. What age group benefited the most?
 4. How does genre preference change by the age group?
@@ -76,6 +76,5 @@
 8. Does "Effect" corelates to Mental health issue (OCD, Insomnia, Depression, Anxiety)
 
 ## Analysis
-1. The percentage of people claim Improment in Mental Health
-> 74% claim improvement
-![Pie chart](Images/1_effects_on_people.svg)
+#### The percentage of people claim Improvement in Mental Health
+<img src="Images/1_effects_on_people.svg" alt="Pie Chart" width="450px">
