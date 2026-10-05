@@ -1,3 +1,17 @@
+# How to Run
+
+```sh
+python -m pip install -r requirements.txt
+
+# Make your choice
+python -m pip install notebook jupyterlab
+
+# Download the dataset
+python ./setup.py 
+
+jupyter lab eda.ipynb || jupyter notebook eda.ipynb
+```
+
 # Music and Mental health Exploratory Data Analysis using Excel
 1. [Data preparation and cleaning phase](#data-preparation-phase)
 2. [Asking questions](#questions-to-ask)
@@ -11,14 +25,14 @@
 |------------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------|
 | Timestamp                    | Timestamp           | DateTime                                                                                                        | Time of Submission                          |
 | Age                          | Age                 | Integer                                                                                                         | Age of the Subject                          |
-| Streaming service            | Service             | [Spotify, Pandora, YouTubeMusic, AppleMusic, Other, NoService]                                                  |                                             |
+| Primary streaming service    | Service             | [Spotify, Pandora, YouTubeMusic, AppleMusic, Other, NoService]                                                  |                                             |
 | Hours per day                | ListenTime          | Decimal(Hours per day)                                                                                          |                                             |
 | While working                | OnWork              | [Yes, No]                                                                                                       | Do subject listen music while working       |
 | Instrumentalist              | IsIns               | [Yes, No]                                                                                                       | Is the subject an Instrumentalist themselve |
 | Composer                     | IsComp              | [Yes, No]                                                                                                       | Is the subject a Composer                   |
 | Fav genre                    | FavGen              | [Classical, Country, EDM, Folk, Gospel, HipHop, Jazz, KPop, Latin, Lofi, Metal, Pop, R&B, Rap, Rock, VideoGame] | The favourite genre of the subject          |
 | Exploratory                  | Exploratory         | [Yes, No]                                                                                                       |                                             |
-| Foreign Language             | Foreign             | [Yes, No]                                                                                                       |                                             |
+| Foreign Languages            | Foreign             | [Yes, No]                                                                                                       |                                             |
 | BPM                          | BPM                 | Integer                                                                                                         |                                             |
 | Frequency [Classical]        | FrClassical         | [Never, Rarely, Sometimes, Very Frequently]                                                                     |                                             |
 | Frequency [Country]          | FrCountry           | [Never, Rarely, Sometimes, Very Frequently]                                                                     |                                             |
@@ -45,8 +59,8 @@
 #### Data Fixes
 | **Anamoly**                                   | **Fix**                                                                                                                                                 |
 |-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 Blank Age value                             | Setting it to a Median                                                                                                                                  |
-| 1 Blank in Service                            | _NoFix_ needed                                                                                                                                          |
+| 1 Blank Age value                             | Setting it to a Mean                                                                                                                                    |
+| 1 Blank in Service                            | Setting to Other                                                                                                                                          |
 | Some exaggerated reported hours in ListenTime | _NoFix_ Fall under Outlier                                                                                                                              |
 | 3 Blanks in OnWork                            | Putting "Yes" if ListenTime is +8Hrs else "No"                                                                                                          |
 | 4 Blanks in IsIns and 1 Blank in IsComp       | Considering them as "No"                                                                                                                                |
