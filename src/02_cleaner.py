@@ -4,9 +4,22 @@ import logging
 import pandas as pd
 import os
 
+# Making sure the data directory is under project root
 data_dir = "./data"
 if os.getcwd().endswith("/src"):
     data_dir = "../data"
+
+# Logging to file and console
+logging.basicConfig(
+    level=logging.INFO, 
+    format="%(asctime)s - %(levelname)s [%(lineno)d] - %(message)s",
+    handlers=[logging.FileHandler(f"{data_dir}/data_cleaning.log"), logging.StreamHandler()])
+
+
+
+###################################
+# Loding and cleaning starts here #
+###################################
 
 df = pd.read_csv(f"{data_dir}/mxmh_survey_results.csv")
 
@@ -186,7 +199,9 @@ for col, (count, percent) in missing_count.items():
         logging.warning(f"Column '{col}' has {count} missing values ({percent:.2f}%).")
 
 
-"""# Loading clean data"""
+"""
+# Saving cleaned data
+"""
 logging.info(f"Final columns of the dataframe: {df1.columns.tolist()}")
 
 df1.to_csv(f"{data_dir}/mxmh_survey_results_clean.csv", index=False)
