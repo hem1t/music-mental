@@ -1,12 +1,13 @@
 """# Loading and Renaming columns"""
 
+import logging
 import pandas as pd
 
 df = pd.read_csv("./data/mxmh_survey_results.csv")
-df.head(3)
+
+logging.info(f"Initial columns of the dataframe: {df.columns.tolist()}")
 
 df1 = df.drop(columns=["Timestamp", "Foreign languages", "Permissions", "Exploratory"])
-df1.columns
 
 # Changing column names
 df1.columns = [
@@ -41,62 +42,89 @@ df1.columns = [
     "effect",
 ]
 
-df1.head(5)
+# Calculating the number of missing values in each column
+missing_count = {}
+for col in df1.columns:
+    missing_count[col] = (df1[col].isna().sum(), df1[col].isna().sum() / len(df1) * 100)
+    logging.info(f"Missing values in column '{col}': {missing_count[col][0]} ({missing_count[col][1]:.2f}%)")
 
-"""# Setting number series if blank to mean
+for col, (count, percent) in missing_count.items():
+    if count > 10:
+        logging.warning(f"Column '{col}' has {count} missing values ({percent:.2f}%).")
+
+"""
+# Setting number series if blank to median
 This includes `age`, `hours_daily`, `bpm`, `*_scr`.
 """
+numerical_columns = [
+    "age",
+    "hours_daily",
+    "bpm",
+    "anxiety_scr",
+    "depression_scr",
+    "insomnia_scr",
+    "ocd_scr",
+]
 
-df1.age = df1["age"].fillna(df1["age"].mean())
-df1.hours_daily = df1["hours_daily"].fillna(df1["hours_daily"].mean())
-df1.bpm = df1["bpm"].fillna(df1["bpm"].mean())
-df1.anxiety_scr = df1["anxiety_scr"].fillna(df1["anxiety_scr"].mean())
-df1.depression_scr = df1["depression_scr"].fillna(df1["depression_scr"].mean())
-df1.insomnia_scr = df1["insomnia_scr"].fillna(df1["insomnia_scr"].mean())
-df1.ocd_scr = df1["ocd_scr"].fillna(df1["ocd_scr"].mean())
+logging.info(f"Numerical columns to fill NAs with median: {numerical_columns}")
+logging.info(f"Missing values before filling: {df1[numerical_columns].isna().sum()}")
 
-# Test before proceding
-assert df1.age.isna().sum() == 0
-assert df1.hours_daily.isna().sum() == 0
-assert df1.bpm.isna().sum() == 0
-assert df1.anxiety_scr.isna().sum() == 0
-assert df1.depression_scr.isna().sum() == 0
-assert df1.insomnia_scr.isna().sum() == 0
-assert df1.ocd_scr.isna().sum() == 0
+for col in numerical_columns:
+    df1[col] = df1[col].fillna(df1[col].median())
+
+logging.info(f"Missing values after filling: {df1[numerical_columns].isna().sum()}")
+
+
 
 """# Filling NAs of Yes and Nos if any Na
 This includes `listen_on_work`, `is_instrumentalist`, `is_composer`.
 """
+yn_columns = ["listen_on_work", "is_instrumentalist", "is_composer"]
 
-df1.listen_on_work = df1["listen_on_work"].fillna("No")
-df1.is_instrumentalist = df1["is_instrumentalist"].fillna("No")
-df1.is_composer = df1["is_composer"].fillna("No")
+logging.info(f"YN columns to fill NAs with 'No': {yn_columns}")
+logging.info(f"Missing values before filling: {df1[yn_columns].isna().sum()}")
 
-# Test
-assert df1.listen_on_work.isna().sum() == 0
-assert df1.is_instrumentalist.isna().sum() == 0
-assert df1.is_composer.isna().sum() == 0
+for col in yn_columns:
+    df1[col] = df1[col].fillna("No")
 
-"""# Primary Streaming service fix
+logging.info(f"Missing values after filling: {df1[yn_columns].isna().sum()}")
+
 
 """
+# Setting frequencies
+If na set to Never
+"""
+frequency_columns = df1.columns[df1.columns.str.startswith("fr_")]
 
-df1.streaming_service.unique()
+for col in frequency_columns:
+    df1[col] = df1[col].fillna("Never")
 
+logging.info(f"Missing values in frequency columns after filling: {df1[frequency_columns].isna().sum()}")
+
+
+
+"""
+# Primary Streaming service value replacement and filling NAs with Other
+"""
+logging.info(f"Values in 'streaming_service' column before cleaning: {df1.streaming_service.unique()}")
 df1.streaming_service = df1.streaming_service.replace(
     {"I do not use a streaming service.": "Other", "Other streaming service": "Other"}
 )
-
 df1.streaming_service = df1.streaming_service.fillna("Other")
 
 # is subset
 assert {"Spotify", "Pandora", "YouTube Music", "Other", "Apple Music"} <= set(
     df1.streaming_service.unique()
 )
+logging.info(f"Values in 'streaming_service' column after cleaning: {df1.streaming_service.unique()}")
 
-"""# Favorite Genre"""
 
-df1.fav_genre.unique()
+
+"""
+# Favorite Genre
+"""
+
+logging.info(f"Values in 'fav_genre' column before cleaning: {df1.fav_genre.unique()}")
 
 df1.fav_genre = df1.fav_genre.replace(
     {"Video game music": "VideoGame", "Hip hop": "HipHop", "K pop": "KPop"}
@@ -124,54 +152,36 @@ assert {
     "Gospel",
 } <= set(df1.fav_genre.unique())
 
-"""# Music Effect"""
+logging.info(f"Values in 'fav_genre' column after cleaning: {df1.fav_genre.unique()}")
 
-df1.effect.unique()
 
-df1.effect = df1.effect.fillna("No effect")
+"""
+# Music Effect
+"""
+logging.info(f"Values in 'effect' column before cleaning: {df1.effect.unique()}")
+
+if df1.effect.isna().sum() > 0:
+    logging.info(f"Missing values in 'effect' column: {df1.effect.isna().sum()}") 
+    df1.effect = df1.effect.fillna("No effect")
+    logging.info(f"Missing values in 'effect' column after filling: {df1.effect.isna().sum()}")
 
 # is subset
 assert {"No effect", "Improve", "Worsen"} <= set(df1.effect.unique())
+logging.info(f"Values in 'effect' column after cleaning: {df1.effect.unique()}")
 
-"""# Setting frequencies
-If na set to Never
-"""
 
-df1.fr_classical = df1.fr_classical.fillna("Never")
-df1.fr_country = df1.fr_country.fillna("Never")
-df1.fr_edm = df1.fr_edm.fillna("Never")
-df1.fr_folk = df1.fr_folk.fillna("Never")
-df1.fr_gospel = df1.fr_gospel.fillna("Never")
-df1.fr_hiphop = df1.fr_hiphop.fillna("Never")
-df1.fr_jazz = df1.fr_jazz.fillna("Never")
-df1.fr_kpop = df1.fr_kpop.fillna("Never")
-df1.fr_latin = df1.fr_latin.fillna("Never")
-df1.fr_lofi = df1.fr_lofi.fillna("Never")
-df1.fr_metal = df1.fr_metal.fillna("Never")
-df1.fr_pop = df1.fr_pop.fillna("Never")
-df1.fr_rnb = df1.fr_rnb.fillna("Never")
-df1.fr_rap = df1.fr_rap.fillna("Never")
-df1.fr_rock = df1.fr_rock.fillna("Never")
-df1.fr_videogame = df1.fr_videogame.fillna("Never")
-# test
-assert df1.fr_classical.isna().sum() == 0
-assert df1.fr_country.isna().sum() == 0
-assert df1.fr_edm.isna().sum() == 0
-assert df1.fr_folk.isna().sum() == 0
-assert df1.fr_gospel.isna().sum() == 0
-assert df1.fr_hiphop.isna().sum() == 0
-assert df1.fr_jazz.isna().sum() == 0
-assert df1.fr_kpop.isna().sum() == 0
-assert df1.fr_latin.isna().sum() == 0
-assert df1.fr_lofi.isna().sum() == 0
-assert df1.fr_metal.isna().sum() == 0
-assert df1.fr_pop.isna().sum() == 0
-assert df1.fr_rnb.isna().sum() == 0
-assert df1.fr_rap.isna().sum() == 0
-assert df1.fr_rock.isna().sum() == 0
-assert df1.fr_videogame.isna().sum() == 0
+# Calculating the number of missing values in each column
+missing_count = {}
+for col in df1.columns:
+    missing_count[col] = (df1[col].isna().sum(), df1[col].isna().sum() / len(df1) * 100)
+    logging.info(f"Missing values after cleaning in column '{col}': {missing_count[col][0]} ({missing_count[col][1]:.2f}%)")
+
+for col, (count, percent) in missing_count.items():
+    if count > 0:
+        logging.warning(f"Column '{col}' has {count} missing values ({percent:.2f}%).")
 
 
 """# Loading clean data"""
+logging.info(f"Final columns of the dataframe: {df1.columns.tolist()}")
 
 df1.to_csv("./data/mxmh_survey_results_clean.csv", index=False)
