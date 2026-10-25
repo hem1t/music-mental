@@ -2,8 +2,13 @@
 
 import logging
 import pandas as pd
+import os
 
-df = pd.read_csv("./data/mxmh_survey_results.csv")
+data_dir = "./data"
+if os.getcwd().endswith("/src"):
+    data_dir = "../data"
+
+df = pd.read_csv(f"{data_dir}/mxmh_survey_results.csv")
 
 logging.info(f"Initial columns of the dataframe: {df.columns.tolist()}")
 
@@ -184,4 +189,4 @@ for col, (count, percent) in missing_count.items():
 """# Loading clean data"""
 logging.info(f"Final columns of the dataframe: {df1.columns.tolist()}")
 
-df1.to_csv("./data/mxmh_survey_results_clean.csv", index=False)
+df1.to_csv(f"{data_dir}/mxmh_survey_results_clean.csv", index=False)
