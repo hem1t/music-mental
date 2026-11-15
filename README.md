@@ -1,8 +1,10 @@
 # Introduction
 
+Performing Exploratory Data Analysis on the music and mental health dataset ([dataset link](https://www.kaggle.com/datasets/catherinerasgaitis/mxmh-survey-results)). Dataset contains 700+ surveyed data with columns indicating music genre, bpm, favorite genre, perceived result of the participants.
+
 ## How to View Report
 
-Either visit `src/complete_documented_pipe.ipynb`. Or if trying to run locally use below steps.
+Either visit [`src/complete_documented_pipe.ipynb`](src/complete_documented_pipe.ipynb). Or if trying to run locally use below steps.
 
 ```sh
 python -m pip install -r requirements.txt
