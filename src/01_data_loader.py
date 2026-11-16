@@ -3,9 +3,9 @@
 import kagglehub
 import os
 
-data_dir = "./data"
+data_dir = "./.data"
 if os.getcwd().endswith("/src"):
-    data_dir = "../data"
+    data_dir = "../.data"
 
 
 kagglehub.dataset_download(
