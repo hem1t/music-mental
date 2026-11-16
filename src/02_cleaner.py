@@ -92,7 +92,7 @@ def data_stats(df):
         )
     d1 = pd.DataFrame(d1, index=numerical_columns)
 
-    categorical_columns = df.select_dtypes(include=['object']).columns.tolist()
+    categorical_columns = df.select_dtypes(include=['str']).columns.tolist()
     d2 = []
     for col in categorical_columns:
         d2.append(
@@ -108,35 +108,65 @@ def data_stats(df):
 
     return d1, d2
 
+def find_and_log_anamolies(df):
+    # Checking stats before cleaning
+    num_stats, cat_stats = data_stats(df)
 
-# Checking stats before cleaning
-num_stats, cat_stats = data_stats(df)
+    ## Report ie log anomalies
+    num_cols_with_high_missing_values = []
+    cat_cols_with_high_missing_values = []
+    # Present null values
+    for row in num_stats.index:
+        if num_stats.loc[row, 'missing_values'] > 0:
+            logging.warning(f"Column '{row}' has missing values: {num_stats.loc[row, 'missing_values']}")
+            num_cols_with_high_missing_values.append(row)
 
-## Report ie log anomalies
-num_cols_with_high_missing_values = []
-cat_cols_with_high_missing_values = []
-# Present null values
-for row in num_stats.index:
-    if num_stats.loc[row, 'missing_values'] > 10:
-        logging.warning(f"Column '{row}' has missing values: {num_stats.loc[row, 'missing_values']}")
-        num_cols_with_high_missing_values.append(row)
+    for row in cat_stats.index:
+        if cat_stats.loc[row, 'missing_values_percentage'] > 0:
+            logging.warning(f"Column '{row}' has missing values: {cat_stats.loc[row, 'missing_values_percentage']:.2f}%")
+            cat_cols_with_high_missing_values.append(row)
 
-for row in cat_stats.index:
-    if cat_stats.loc[row, 'missing_values_percentage'] > 10:
-        logging.warning(f"Column '{row}' has missing values: {cat_stats.loc[row, 'missing_values_percentage']:.2f}%")
-        cat_cols_with_high_missing_values.append(row)
+    cols_with_high_kurt = []
+    cols_with_high_skew = []
 
-cols_with_high_kurt_skew = []
-# imporper skewness and kurtosis
-for row in num_stats.index:
-    if abs(num_stats.loc[row, 'skew']) > 2:
-        logging.warning(f"Column '{row}' has high skewness: {num_stats.loc[row, 'skew']}")
-        cols_with_high_kurt_skew.append(row)
-    if abs(num_stats.loc[row, 'kurtosis']) > 5:
-        logging.warning(f"Column '{row}' has high kurtosis: {num_stats.loc[row, 'kurtosis']}")
-        cols_with_high_kurt_skew.append(row)
+    # imporper skewness and kurtosis
+    for row in num_stats.index:
+        if abs(num_stats.loc[row, 'skew']) > 2:
+            logging.warning(f"Column '{row}' has high skewness: {num_stats.loc[row, 'skew']}")
+            cols_with_high_skew.append(row)
+        if abs(num_stats.loc[row, 'kurtosis']) > 2:
+            logging.warning(f"Column '{row}' has high kurtosis: {num_stats.loc[row, 'kurtosis']}")
+            cols_with_high_kurt.append(row)
+
+    return (num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_high_kurt, cols_with_high_skew)
+
+num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_high_kurt, cols_with_high_skew = find_and_log_anamolies(df)
+
+## Fixing missings before (can't trim them directly)
+for col in num_cols_with_high_missing_values:
+    df[col] = df[col].fillna(df[col].median())
+
+for col in cat_cols_with_high_missing_values:
+    df[col] = df[col].fillna(df[col].mode()[0])
 
 
+num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_high_kurt, cols_with_high_skew = find_and_log_anamolies(df)
+
+## Trying fix on high kurtosis by trimming heavy tail
+## Keep trimming till 5 - 95 or till kurtosis value is in right range
+for col in cols_with_high_kurt:
+    # Future TODO: trim from side where there is better result.
+    for percentile_diff in range(1, 5):
+        logging.info(f"Trimming column '{col}' with percentile difference: {percentile_diff}")
+        df = df[(df[col] >= df[col].quantile(percentile_diff/100))]
+        if abs(df[col].kurtosis()) <= 2:
+            break
+        df = df[(df[col] <= df[col].quantile(1 - percentile_diff/100))]
+        if abs(df[col].kurtosis()) <= 2:
+            break
+
+
+num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_high_kurt, cols_with_high_skew = find_and_log_anamolies(df)
 
 # """
 # # Setting number series if blank to median
