@@ -23,5 +23,5 @@ jupyter lab eda.ipynb || jupyter notebook eda.ipynb
 1. How many percent of people claim Improvement in Mental Health?
 2. Does "Effect" changes across different Mental health issues (OCD, Insomnia, Depression, Anxiety)
 3. Does "Effect" changes across different genres listened?
-4. What age group benefited the most?
+4. "Effect" across age groups?
 5. How "Effect" corelates to BPM of the Music?
