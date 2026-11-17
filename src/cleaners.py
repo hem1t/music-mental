@@ -63,13 +63,11 @@ fix_columns(df)
 from collections import OrderedDict
 
 
-def data_stats(df):
+def numerical_col_stats(df):
     """
     Routine to generate complete stats on datatable.
         input: Dataframe
-        output: (d1, d2)
-            d1: Numerical columns stats dataframe
-            d2: Categorical columns stats dataframe
+        output: Numerical columns stats dataframe
     """
     numerical_columns = df.select_dtypes(include=["number"]).columns.tolist()
     d1 = []
@@ -93,6 +91,7 @@ def data_stats(df):
         )
     d1 = pd.DataFrame(d1, index=numerical_columns)
 
+def categorical_col_stats(df):
     categorical_columns = df.select_dtypes(include=["str"]).columns.tolist()
     d2 = []
     for col in categorical_columns:
@@ -205,54 +204,6 @@ for col in cols_with_high_kurt:
     cols_with_high_kurt,
     cols_with_high_skew,
 ) = find_and_log_anamolies(df)
-
-# """
-# # Setting number series if blank to median
-# This includes `age`, `hours_daily`, `bpm`, `*_scr`.
-# """
-# numerical_columns = [
-#     "age",
-#     "hours_daily",
-#     "bpm",
-#     "anxiety_scr",
-#     "depression_scr",
-#     "insomnia_scr",
-#     "ocd_scr",
-# ]
-
-# logging.info(f"Numerical columns to fill NAs with median: {numerical_columns}")
-# logging.info(f"Missing values before filling: {df1[numerical_columns].isna().sum()}")
-
-# for col in numerical_columns:
-#     df1[col] = df1[col].fillna(df1[col].median())
-
-# logging.info(f"Missing values after filling: {df1[numerical_columns].isna().sum()}")
-
-
-# """# Filling NAs of Yes and Nos if any Na
-# This includes `listen_on_work`, `is_instrumentalist`, `is_composer`.
-# """
-# yn_columns = ["listen_on_work", "is_instrumentalist", "is_composer"]
-
-# logging.info(f"YN columns to fill NAs with 'No': {yn_columns}")
-# logging.info(f"Missing values before filling: {df1[yn_columns].isna().sum()}")
-
-# for col in yn_columns:
-#     df1[col] = df1[col].fillna("No")
-
-# logging.info(f"Missing values after filling: {df1[yn_columns].isna().sum()}")
-
-
-# """
-# # Setting frequencies
-# If na set to Never
-# """
-# frequency_columns = df1.columns[df1.columns.str.startswith("fr_")]
-
-# for col in frequency_columns:
-#     df1[col] = df1[col].fillna("Never")
-
-# logging.info(f"Missing values in frequency columns after filling: {df1[frequency_columns].isna().sum()}")
 
 
 # """
