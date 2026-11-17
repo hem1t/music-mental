@@ -2,6 +2,11 @@
 
 Performing Exploratory Data Analysis on the music and mental health dataset ([dataset link](https://www.kaggle.com/datasets/catherinerasgaitis/mxmh-survey-results)). Dataset contains 700+ surveyed data with columns indicating music genre, bpm, favorite genre, perceived result of the participants.
 
+## Progress
+
+* ✅ Initial notebook analysis
+* ⬜ Streamlit based dashboard
+
 ## How to View Report
 
 Either visit [`eda_notebook.ipynb`](eda_notebook.ipynb). Or if trying to run locally use below steps.
