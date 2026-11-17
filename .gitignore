@@ -2,3 +2,4 @@
 .venv
 .ipynb_checkpoints
 .parking_lot
+**/__pycache__/

@@ -2,67 +2,66 @@
 
 import logging
 import pandas as pd
-import os
+import helpers
 
-# Making sure the data directory is under project root
-data_dir = "./.data"
-if os.getcwd().endswith("/src"):
-    data_dir = "../.data"
-
-# Logging to file and console
-logging.basicConfig(
-    level=logging.INFO, 
-    format="%(asctime)s - %(levelname)s [%(lineno)d] - %(message)s",
-    handlers=[logging.FileHandler(f"{data_dir}/data_cleaning.log"), logging.StreamHandler()])
-
-
-logging.info(f"Data directory set to: {data_dir}")
+data_dir = helpers.get_data_dir()
 
 ###################################
-# Loding and cleaning starts here #
+# Loading and cleaning starts here #
 ###################################
 
-df = pd.read_csv(f"{data_dir}/mxmh_survey_results.csv")
+helpers.enable_logging()
 
-logging.info(f"Initial columns of the dataframe: {df.columns.tolist()}")
+df = helpers.get_uncleaned_data()
 
-## Dropping columns
-df.drop(columns=["Timestamp", "Foreign languages", "Permissions", "Exploratory"], inplace=True)
-# Changing column names
-df.columns = [
-    "age",
-    "streaming_service",
-    "hours_daily",
-    "listen_on_work",
-    "is_instrumentalist",
-    "is_composer",
-    "fav_genre",
-    "bpm",
-    "fr_classical",
-    "fr_country",
-    "fr_edm",
-    "fr_folk",
-    "fr_gospel",
-    "fr_hiphop",
-    "fr_jazz",
-    "fr_kpop",
-    "fr_latin",
-    "fr_lofi",
-    "fr_metal",
-    "fr_pop",
-    "fr_rnb",
-    "fr_rap",
-    "fr_rock",
-    "fr_videogame",
-    "anxiety_scr",
-    "depression_scr",
-    "insomnia_scr",
-    "ocd_scr",
-    "effect",
-]
+
+def fix_columns(df):
+    ## Dropping columns
+    columns = ["Timestamp", "Foreign languages", "Permissions", "Exploratory"]
+
+    df.drop(
+        columns=columns,
+        inplace=True,
+    )
+
+    # Changing column names
+    df.columns = [
+        "age",
+        "streaming_service",
+        "hours_daily",
+        "listen_on_work",
+        "is_instrumentalist",
+        "is_composer",
+        "fav_genre",
+        "bpm",
+        "fr_classical",
+        "fr_country",
+        "fr_edm",
+        "fr_folk",
+        "fr_gospel",
+        "fr_hiphop",
+        "fr_jazz",
+        "fr_kpop",
+        "fr_latin",
+        "fr_lofi",
+        "fr_metal",
+        "fr_pop",
+        "fr_rnb",
+        "fr_rap",
+        "fr_rock",
+        "fr_videogame",
+        "anxiety_scr",
+        "depression_scr",
+        "insomnia_scr",
+        "ocd_scr",
+        "effect",
+    ]
+
+fix_columns(df)
 
 ## Stats before cleaning
 from collections import OrderedDict
+
 
 def data_stats(df):
     """
@@ -72,41 +71,49 @@ def data_stats(df):
             d1: Numerical columns stats dataframe
             d2: Categorical columns stats dataframe
     """
-    numerical_columns = df.select_dtypes(include=['number']).columns.tolist()
+    numerical_columns = df.select_dtypes(include=["number"]).columns.tolist()
     d1 = []
     for col in numerical_columns:
         d1.append(
-            OrderedDict({
-                'min': df[col].min(),
-                'max': df[col].max(),
-                'mean': df[col].mean(),
-                'std': df[col].std(),
-                '50%': df[col].quantile(0.5),
-                '25%': df[col].quantile(0.25),
-                '75%': df[col].quantile(0.75),
-                'IQR': df[col].quantile(0.75) - df[col].quantile(0.25),
-                'skew': df[col].skew(),
-                'kurtosis': df[col].kurtosis(),
-                'missing_values': df[col].isnull().sum()/df.shape[0] * 100,
-            })
+            OrderedDict(
+                {
+                    "min": df[col].min(),
+                    "max": df[col].max(),
+                    "mean": df[col].mean(),
+                    "std": df[col].std(),
+                    "50%": df[col].quantile(0.5),
+                    "25%": df[col].quantile(0.25),
+                    "75%": df[col].quantile(0.75),
+                    "IQR": df[col].quantile(0.75) - df[col].quantile(0.25),
+                    "skew": df[col].skew(),
+                    "kurtosis": df[col].kurtosis(),
+                    "missing_values": df[col].isnull().sum() / df.shape[0] * 100,
+                }
+            )
         )
     d1 = pd.DataFrame(d1, index=numerical_columns)
 
-    categorical_columns = df.select_dtypes(include=['str']).columns.tolist()
+    categorical_columns = df.select_dtypes(include=["str"]).columns.tolist()
     d2 = []
     for col in categorical_columns:
         d2.append(
-            OrderedDict({
-                'unique_values': df[col].nunique(),
-                'top_value': df[col].mode()[0],
-                'top_value_percentage': df[col].value_counts(normalize=True).iloc[0] * 100,
-                'missing_values_percentage': df[col].isnull().sum()/df.shape[0] * 100,
-                'unique_values_list': df[col].unique()
-            })
+            OrderedDict(
+                {
+                    "unique_values": df[col].nunique(),
+                    "top_value": df[col].mode()[0],
+                    "top_value_percentage": df[col].value_counts(normalize=True).iloc[0]
+                    * 100,
+                    "missing_values_percentage": df[col].isnull().sum()
+                    / df.shape[0]
+                    * 100,
+                    "unique_values_list": df[col].unique(),
+                }
+            )
         )
     d2 = pd.DataFrame(d2, index=categorical_columns)
 
     return d1, d2
+
 
 def find_and_log_anamolies(df):
     # Checking stats before cleaning
@@ -117,13 +124,17 @@ def find_and_log_anamolies(df):
     cat_cols_with_high_missing_values = []
     # Present null values
     for row in num_stats.index:
-        if num_stats.loc[row, 'missing_values'] > 0:
-            logging.warning(f"Column '{row}' has missing values: {num_stats.loc[row, 'missing_values']}")
+        if num_stats.loc[row, "missing_values"] > 0:
+            logging.warning(
+                f"Column '{row}' has missing values: {num_stats.loc[row, 'missing_values']}"
+            )
             num_cols_with_high_missing_values.append(row)
 
     for row in cat_stats.index:
-        if cat_stats.loc[row, 'missing_values_percentage'] > 0:
-            logging.warning(f"Column '{row}' has missing values: {cat_stats.loc[row, 'missing_values_percentage']:.2f}%")
+        if cat_stats.loc[row, "missing_values_percentage"] > 0:
+            logging.warning(
+                f"Column '{row}' has missing values: {cat_stats.loc[row, 'missing_values_percentage']:.2f}%"
+            )
             cat_cols_with_high_missing_values.append(row)
 
     cols_with_high_kurt = []
@@ -131,16 +142,31 @@ def find_and_log_anamolies(df):
 
     # imporper skewness and kurtosis
     for row in num_stats.index:
-        if abs(num_stats.loc[row, 'skew']) > 2:
-            logging.warning(f"Column '{row}' has high skewness: {num_stats.loc[row, 'skew']}")
+        if abs(num_stats.loc[row, "skew"]) > 2:
+            logging.warning(
+                f"Column '{row}' has high skewness: {num_stats.loc[row, 'skew']}"
+            )
             cols_with_high_skew.append(row)
-        if abs(num_stats.loc[row, 'kurtosis']) > 2:
-            logging.warning(f"Column '{row}' has high kurtosis: {num_stats.loc[row, 'kurtosis']}")
+        if abs(num_stats.loc[row, "kurtosis"]) > 2:
+            logging.warning(
+                f"Column '{row}' has high kurtosis: {num_stats.loc[row, 'kurtosis']}"
+            )
             cols_with_high_kurt.append(row)
 
-    return (num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_high_kurt, cols_with_high_skew)
+    return (
+        num_cols_with_high_missing_values,
+        cat_cols_with_high_missing_values,
+        cols_with_high_kurt,
+        cols_with_high_skew,
+    )
 
-num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_high_kurt, cols_with_high_skew = find_and_log_anamolies(df)
+
+(
+    num_cols_with_high_missing_values,
+    cat_cols_with_high_missing_values,
+    cols_with_high_kurt,
+    cols_with_high_skew,
+) = find_and_log_anamolies(df)
 
 ## Fixing missings before (can't trim them directly)
 for col in num_cols_with_high_missing_values:
@@ -150,23 +176,35 @@ for col in cat_cols_with_high_missing_values:
     df[col] = df[col].fillna(df[col].mode()[0])
 
 
-num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_high_kurt, cols_with_high_skew = find_and_log_anamolies(df)
+(
+    num_cols_with_high_missing_values,
+    cat_cols_with_high_missing_values,
+    cols_with_high_kurt,
+    cols_with_high_skew,
+) = find_and_log_anamolies(df)
 
 ## Trying fix on high kurtosis by trimming heavy tail
 ## Keep trimming till 5 - 95 or till kurtosis value is in right range
 for col in cols_with_high_kurt:
     # Future TODO: trim from side where there is better result.
     for percentile_diff in range(1, 5):
-        logging.info(f"Trimming column '{col}' with percentile difference: {percentile_diff}")
-        df = df[(df[col] >= df[col].quantile(percentile_diff/100))]
+        logging.info(
+            f"Trimming column '{col}' with percentile difference: {percentile_diff}"
+        )
+        df = df[(df[col] >= df[col].quantile(percentile_diff / 100))]
         if abs(df[col].kurtosis()) <= 2:
             break
-        df = df[(df[col] <= df[col].quantile(1 - percentile_diff/100))]
+        df = df[(df[col] <= df[col].quantile(1 - percentile_diff / 100))]
         if abs(df[col].kurtosis()) <= 2:
             break
 
 
-num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_high_kurt, cols_with_high_skew = find_and_log_anamolies(df)
+(
+    num_cols_with_high_missing_values,
+    cat_cols_with_high_missing_values,
+    cols_with_high_kurt,
+    cols_with_high_skew,
+) = find_and_log_anamolies(df)
 
 # """
 # # Setting number series if blank to median
@@ -189,7 +227,6 @@ num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_
 #     df1[col] = df1[col].fillna(df1[col].median())
 
 # logging.info(f"Missing values after filling: {df1[numerical_columns].isna().sum()}")
-
 
 
 # """# Filling NAs of Yes and Nos if any Na
@@ -218,7 +255,6 @@ num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_
 # logging.info(f"Missing values in frequency columns after filling: {df1[frequency_columns].isna().sum()}")
 
 
-
 # """
 # # Primary Streaming service value replacement and filling NAs with Other
 # """
@@ -233,7 +269,6 @@ num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_
 #     df1.streaming_service.unique()
 # )
 # logging.info(f"Values in 'streaming_service' column after cleaning: {df1.streaming_service.unique()}")
-
 
 
 # """
@@ -277,7 +312,7 @@ num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_
 # logging.info(f"Values in 'effect' column before cleaning: {df1.effect.unique()}")
 
 # if df1.effect.isna().sum() > 0:
-#     logging.info(f"Missing values in 'effect' column: {df1.effect.isna().sum()}") 
+#     logging.info(f"Missing values in 'effect' column: {df1.effect.isna().sum()}")
 #     df1.effect = df1.effect.fillna("No effect")
 #     logging.info(f"Missing values in 'effect' column after filling: {df1.effect.isna().sum()}")
 
@@ -300,6 +335,6 @@ num_cols_with_high_missing_values, cat_cols_with_high_missing_values, cols_with_
 # """
 # # Saving cleaned data
 # """
-# logging.info(f"Final columns of the dataframe: {df1.columns.tolist()}")
+logging.info(f"Final columns of the dataframe: {df.columns.tolist()}")
 
-# df1.to_csv(f"{data_dir}/mxmh_survey_results_clean.csv", index=False)
+df.to_csv(f"{data_dir}/mxmh_survey_results_cleaner.csv", index=False)
