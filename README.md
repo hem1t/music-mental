@@ -4,8 +4,9 @@ Performing Exploratory Data Analysis on the music and mental health dataset ([da
 
 ## How to View Report
 
-Either visit [`src/complete_documented_pipe.ipynb`](src/complete_documented_pipe.ipynb). Or if trying to run locally use below steps.
-TODO: Add pipeline instructions here, when done with pipeline.
+Either visit [`eda_notebook.ipynb`](eda_notebook.ipynb). Or if trying to run locally use below steps.
+
+<!-- TODO: Add pipeline instructions here, when done with pipeline. -->
 
 ```sh
 python -m pip install -r requirements.txt
