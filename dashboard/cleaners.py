@@ -4,13 +4,9 @@ import logging
 import pandas as pd
 import helpers
 
-data_dir = helpers.get_data_dir()
-
 ###################################
 # Loading and cleaning starts here #
 ###################################
-
-df = helpers.get_uncleaned_data()
 
 def fix_columns(df):
     ## Dropping columns
