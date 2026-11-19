@@ -18,6 +18,9 @@ def download_data(force=False):
     if force:
         log_info("Enabled force download from kaggle.")
 
+    if not os.path.exists(get_data_dir()):
+        os.mkdir(get_data_dir())
+
     try:
         log_info("Downloading data from kaggle.")
         kagglehub.dataset_download(
