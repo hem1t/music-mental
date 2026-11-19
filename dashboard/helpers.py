@@ -18,8 +18,9 @@ def download_data(force=False):
     if force:
         log_info("Enabled force download from kaggle.")
 
-    if not os.path.exists(get_data_dir()):
-        os.mkdir(get_data_dir())
+    data_dir = get_data_dir()
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir)
 
     try:
         log_info("Downloading data from kaggle.")
@@ -65,6 +66,10 @@ LOGGING = False
 def enable_logging():
     global LOGGING
     LOGGING = True
+
+    data_dir = get_data_dir()
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir)
 
     logging.basicConfig(
         level=logging.INFO,
